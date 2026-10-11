@@ -7,8 +7,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app.py .
-COPY student_result_model.pkl .
-COPY metrics.json .
+COPY train_model.py .
+COPY ckd_dataset.csv .
+
+RUN python train_model.py
 
 EXPOSE 5000
 
