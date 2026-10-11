@@ -1,4 +1,19 @@
 
+name: ML Application CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Prepare release candidate
         run: |
           mkdir -p release_candidate
