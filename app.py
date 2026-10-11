@@ -2,14 +2,14 @@
 from flask import Flask, request, jsonify
 import pandas as pd
 import joblib
-import os
 
 app = Flask(__name__)
 
-MODEL_PATH = "ckd_model.pkl"
-model = joblib.load(MODEL_PATH)
+saved = joblib.load("ckd_model.pkl")
+model = saved["model"]
+columns = saved["columns"]
 
-@app.route("/", methods=["GET"])
+@app.route("/")
 def home():
     return jsonify({
         "service": "CKD Prediction API",
@@ -20,16 +20,15 @@ def home():
 def predict():
     try:
         data = request.get_json()
+        if not isinstance(data, dict):
+            return jsonify({"error": "Provide a JSON object"}), 400
 
-        if not data:
-            return jsonify({"error": "Send input as JSON"}), 400
+        row = pd.DataFrame([data])
+        row = pd.get_dummies(row, dummy_na=True)
+        row = row.reindex(columns=columns, fill_value=0)
 
-        features = pd.DataFrame([data])
-        prediction = model.predict(features)[0]
-
-        return jsonify({
-            "prediction": str(prediction)
-        })
+        result = model.predict(row)[0]
+        return jsonify({"prediction": str(result)})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400
